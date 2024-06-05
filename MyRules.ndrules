@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Queries>
+  <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>DataClasses have no methods</Name>
+warnif count > 0 
+from t in JustMyCode.Types
+let methods = t.Methods.Where(m => !m.IsGeneratedByCompiler && !m.IsPropertyGetter && !m.IsPropertySetter)
+where t.ParentNamespace.NameLike("DataClasses")
+ && methods.Any()
+select new { t, methods }]]></Query>
+  <Group Name="NamingPattern" Active="True" ShownInReport="False">
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Namingpattern Repository is followed</Name>
+warnif count > 0 
+
+let patternName = "Repository"
+let allowedMethods = new string[]{"Insert","Update","Remove","Query"}
+let allowedPrefixes = new string []{}
+
+from t in JustMyCode.Types
+
+let methods = t.Methods.Where(m => !m.IsPropertySetter && !m.IsPropertyGetter && !m.IsConstructor)
+let forbiddenMethods = methods.Where(m => !allowedMethods.Any(m1 => m.SimpleName == m1) 
+                                          && allowedPrefixes.All(mp => !m.SimpleName.StartsWith(mp)))
+where !t.IsGeneratedByCompiler
+ && t.Name.EndsWith(patternName)
+ && forbiddenMethods.Any()
+
+
+select new{t, forbiddenMethods}]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Namingpattern Manager is followed</Name>
+warnif count > 0
+from t in JustMyCode.Types
+
+let methods = t.Methods.Where(m => !m.IsPropertySetter && !m.IsPropertyGetter && !m.IsConstructor)
+let allowedMethods = new[]{"Add","Remove","Update"}
+let allowedPrefixes = new[]{"Get","Is","Are"}
+
+let forbiddenMethods = methods.Where(m => !allowedMethods.Any(m1 => m.SimpleName == m1) 
+                                          && allowedPrefixes.All(mp => !m.SimpleName.StartsWith(mp)))
+
+where !t.IsGeneratedByCompiler
+ && t.Name.EndsWith("Manager")
+ && forbiddenMethods.Any()
+
+
+select new{t, forbiddenMethods}
+]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Namingpattern Reader is followed</Name>
+warnif count > 0 
+
+let patternName = "Reader"
+let allowedMethods = new string[]{}
+let allowedPrefixes = new string []{"Read"}
+
+from t in JustMyCode.Types
+
+let methods = t.Methods.Where(m => !m.IsPropertySetter && !m.IsPropertyGetter && !m.IsConstructor)
+let forbiddenMethods = methods.Where(m => !allowedMethods.Any(m1 => m.SimpleName == m1) 
+                                          && allowedPrefixes.All(mp => !m.SimpleName.StartsWith(mp)))
+where !t.IsGeneratedByCompiler
+ && t.Name.EndsWith(patternName)
+ && forbiddenMethods.Any()
+
+
+select new{t, forbiddenMethods}]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Namingpattern Parser is followed</Name>
+warnif count > 0 
+
+let patternName = "Parser"
+let allowedMethods = new string[]{"Parse"}
+let allowedPrefixes = new string []{}
+
+from t in JustMyCode.Types
+
+let methods = t.Methods.Where(m => !m.IsPropertySetter && !m.IsPropertyGetter && !m.IsConstructor)
+let forbiddenMethods = methods.Where(m => !allowedMethods.Any(m1 => m.SimpleName == m1) 
+                                          && allowedPrefixes.All(mp => !m.SimpleName.StartsWith(mp)))
+where !t.IsGeneratedByCompiler
+ && t.Name.EndsWith(patternName)
+ && forbiddenMethods.Any()
+
+
+select new{t, forbiddenMethods}]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Namingpattern Command is followed</Name>
+warnif count > 0 
+
+let patternName = "Command"
+let allowedMethods = new string[]{}
+let allowedPrefixes = new string []{"Show"}
+
+from t in JustMyCode.Types
+
+let methods = t.Methods.Where(m => !m.IsPropertySetter && !m.IsPropertyGetter && !m.IsConstructor)
+let forbiddenMethods = methods.Where(m => !allowedMethods.Any(m1 => m.SimpleName == m1) 
+                                          && allowedPrefixes.All(mp => !m.SimpleName.StartsWith(mp)))
+where !t.IsGeneratedByCompiler
+ && t.Name.EndsWith(patternName)
+ && forbiddenMethods.Any()
+
+
+select new{t, forbiddenMethods}
+]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Classes not following naming patterns</Name>
+warnif count>0
+
+
+// #### BLACKLISTING
+let blacklistedAssemblies = new string[]
+{
+ 
+}
+let blacklistNamespaceSuffix = new string[]{"DataClasses"}
+let blacklistNamespacePrefix = new string[]{}
+let blacklistClasses = new string[]{"Program"}
+
+let managementClasses = JustMyCode.Types
+                    .Where(t => !blacklistedAssemblies.Contains(t.ParentAssembly.Name))
+                    .Where(t => !t.IsGeneratedByCompiler)
+                    .Where(t => blacklistNamespaceSuffix.All(bns => !t.ParentNamespace.Name.EndsWith(bns)))
+                    .Where(t => blacklistNamespacePrefix.All(bns => !t.ParentNamespace.Name.StartsWith(bns)))
+                    .Where(t => !blacklistClasses.Any(bc => t.SimpleName == bc))
+
+// #### Naming Patterns
+let namePatterns = new string[] 
+{
+   "Manager",
+   "Repository",
+   "Parser",
+   "Reader",
+   "Commands"
+}
+
+from t in managementClasses
+where namePatterns.All(np => !t.SimpleName.EndsWith(np))
+select new { t, t.Methods }]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <TrendMetric Name="Percentage of pattern consistency" Unit="%" />  
+
+// #### BLACKLISTING
+let blacklistedAssemblies = new string[]
+{
+ 
+}
+let blacklistNamespaceSuffix = new string[]{"DataClasses"}
+let blacklistNamespacePrefix = new string[]{}
+let blacklistClasses = new string[]{"Program"}
+
+let typesFiltered = JustMyCode.Types
+                    .Where(t => !blacklistedAssemblies.Contains(t.ParentAssembly.Name))
+                    .Where(t => !t.IsGeneratedByCompiler)
+                    .Where(t => blacklistNamespaceSuffix.All(bns => !t.ParentNamespace.Name.EndsWith(bns)))
+                    .Where(t => blacklistNamespacePrefix.All(bns => !t.ParentNamespace.Name.StartsWith(bns)))
+                    .Where(t => !blacklistClasses.Any(bc => t.SimpleName == bc))
+
+// #### NAMENSMUSTER
+let namePatterns = new string[] 
+{
+   "Manager",
+   "Repository",
+   "Parser",
+   "Reader",
+   "Commands"
+}
+
+// #### ABFRAGE
+let typesFollowingPatterns = typesFiltered.Where(t => namePatterns.Any(np => t.SimpleName.EndsWith(np)))
+let typesNotFollowingPatterns = typesFiltered.Where(t => !namePatterns.Any(np => t.SimpleName.EndsWith(np)))
+select 100d * typesFollowingPatterns.Count() / typesFiltered.Count()]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>No Utilities, Common and Helper</Name>
+
+let forbiddenNames = new string[]{
+   "Helper",
+   "Common",
+   "Utilities",
+   "Utiliy"
+}
+
+from t in JustMyCode.Types
+where forbiddenNames.Any(t1 => t.Name.Contains(t1))
+select new { t }
+
+]]></Query>
+  </Group>
+  <Group Name="SRP Violations" Active="True" ShownInReport="False">
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Problematic classes</Name>
+warnif count > 0 
+from t in JustMyCode.Types
+where !t.IsGeneratedByCompiler
+ && (t.NbLinesOfCode > 2
+ || t.NbMethods > 2)
+select new{t, t.NbLinesOfCode, t.NbMethods}]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Problematic methods</Name>
+warnif count> 0
+from m in JustMyCode.Methods
+where !m.IsPropertyGetter
+ && !m.IsPropertySetter
+ && !m.IsConstructor
+ && !m.IsGeneratedByCompiler
+ && (m.NbLinesOfCode > 2
+ || m.CyclomaticComplexity > 2)
+select new{m, m.ParentType, m.NbLinesOfCode, m.CyclomaticComplexity}
+
+]]></Query>
+  </Group>
+</Queries>
