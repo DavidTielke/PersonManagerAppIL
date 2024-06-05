@@ -80,6 +80,26 @@ where !t.IsGeneratedByCompiler
 
 
 select new{t, forbiddenMethods}]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Namingpattern Factory is followed</Name>
+warnif count > 0 
+
+let patternName = "Factory"
+let allowedMethods = new string[]{}
+let allowedPrefixes = new string []{"Create"}
+
+from t in JustMyCode.Types
+
+let methods = t.Methods.Where(m => !m.IsPropertySetter && !m.IsPropertyGetter && !m.IsConstructor)
+let forbiddenMethods = methods.Where(m => !allowedMethods.Any(m1 => m.SimpleName == m1) 
+                                          && allowedPrefixes.All(mp => !m.SimpleName.StartsWith(mp)))
+where !t.IsGeneratedByCompiler
+ && t.Name.EndsWith(patternName)
+ && forbiddenMethods.Any()
+
+
+select new{t, forbiddenMethods}
+
+]]></Query>
     <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Namingpattern Command is followed</Name>
 warnif count > 0 
 
@@ -110,7 +130,7 @@ let blacklistedAssemblies = new string[]
 }
 let blacklistNamespaceSuffix = new string[]{"DataClasses"}
 let blacklistNamespacePrefix = new string[]{}
-let blacklistClasses = new string[]{"Program"}
+let blacklistClasses = new string[]{"Program","App"}
 
 let managementClasses = JustMyCode.Types
                     .Where(t => !blacklistedAssemblies.Contains(t.ParentAssembly.Name))
@@ -126,7 +146,8 @@ let namePatterns = new string[]
    "Repository",
    "Parser",
    "Reader",
-   "Commands"
+   "Commands",
+   "Factory"
 }
 
 from t in managementClasses
@@ -141,7 +162,7 @@ let blacklistedAssemblies = new string[]
 }
 let blacklistNamespaceSuffix = new string[]{"DataClasses"}
 let blacklistNamespacePrefix = new string[]{}
-let blacklistClasses = new string[]{"Program"}
+let blacklistClasses = new string[]{"Program","App"}
 
 let typesFiltered = JustMyCode.Types
                     .Where(t => !blacklistedAssemblies.Contains(t.ParentAssembly.Name))
@@ -157,7 +178,8 @@ let namePatterns = new string[]
    "Repository",
    "Parser",
    "Reader",
-   "Commands"
+   "Commands",
+   "Factory"
 }
 
 // #### ABFRAGE
