@@ -7,7 +7,26 @@ let methods = t.Methods.Where(m => !m.IsGeneratedByCompiler && !m.IsPropertyGett
 where t.ParentNamespace.NameLike("DataClasses")
  && methods.Any()
 select new { t, methods }]]></Query>
-  <Group Name="NamingPattern" Active="True" ShownInReport="False">
+  <Group Name="SRP Violations" Active="True" ShownInReport="False">
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Problematic classes</Name>
+warnif count > 0 
+from t in JustMyCode.Types
+where !t.IsGeneratedByCompiler
+ && (t.NbLinesOfCode > 220
+ || t.NbMethods > 10)
+select new{t, t.NbLinesOfCode, t.NbMethods}]]></Query>
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Problematic methods</Name>
+warnif count> 0
+from m in JustMyCode.Methods
+where !m.IsPropertyGetter
+ && !m.IsPropertySetter
+ && !m.IsConstructor
+ && !m.IsGeneratedByCompiler
+ && (m.NbLinesOfCode > 20
+ || m.CyclomaticComplexity > 8)
+select new{m, m.ParentType, m.NbLinesOfCode, m.CyclomaticComplexity}
+
+]]></Query>
     <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Namingpattern Repository is followed</Name>
 warnif count > 0 
 
@@ -201,25 +220,22 @@ select new { t }
 
 ]]></Query>
   </Group>
-  <Group Name="SRP Violations" Active="True" ShownInReport="False">
-    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Problematic classes</Name>
+  <Group Name="DIP Violations" Active="True" ShownInReport="False">
+    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>All management classes are decoupled</Name>
 warnif count > 0 
-from t in JustMyCode.Types
-where !t.IsGeneratedByCompiler
- && (t.NbLinesOfCode > 2
- || t.NbMethods > 2)
-select new{t, t.NbLinesOfCode, t.NbMethods}]]></Query>
-    <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Problematic methods</Name>
-warnif count> 0
-from m in JustMyCode.Methods
-where !m.IsPropertyGetter
- && !m.IsPropertySetter
- && !m.IsConstructor
- && !m.IsGeneratedByCompiler
- && (m.NbLinesOfCode > 2
- || m.CyclomaticComplexity > 2)
-select new{m, m.ParentType, m.NbLinesOfCode, m.CyclomaticComplexity}
 
-]]></Query>
+let blacklistClasses = new string[]{"Program","ServiceProviderFactory"}
+
+let managementClasses = JustMyCode.Types.Where(t => !blacklistClasses.Any(bc => t.SimpleName == bc))
+from t in managementClasses
+
+let typesUsedNotContracts = t.TypesUsed.Where(t1 =>    !t1.IsThirdParty 
+                                                    && !t1.IsInterface
+                                                    && !t1.IsGeneratedByCompiler
+                                                    && !t1.ParentNamespace.NameLike("DataClasses"))
+
+where typesUsedNotContracts.Any()
+
+select new { t, typesUsedNotContracts }]]></Query>
   </Group>
 </Queries>
