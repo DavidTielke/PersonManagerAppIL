@@ -9,8 +9,11 @@ namespace PersonManagerApp
 
         static void Main(string[] args)
         {
-
-            _commands = new PersonCommands();
+            var reader = new FileReader();
+            var parser = new PersonParser();
+            var repository = new PersonRepository(reader, parser);
+            var manager = new PersonManager(repository);
+            _commands = new PersonCommands(manager);
 
             _commands.DisplayAllAdults();
             _commands.DisplayAllChildren();

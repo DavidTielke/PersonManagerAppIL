@@ -1,6 +1,6 @@
 ﻿namespace PersonManagerApp;
 
-class FileReader
+class FileReader : IFileReader
 {
     public IEnumerable<string> ReadAllLines(string path)
     {

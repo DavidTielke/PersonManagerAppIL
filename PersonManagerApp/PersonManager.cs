@@ -2,19 +2,14 @@
 
 namespace PersonManagerApp;
 
-class PersonManager
+class PersonManager : IPersonManager
 {
-    private readonly PersonRepository _repository;
+    private readonly IPersonRepository _repository;
 
-    public PersonManager()
+    public PersonManager(IPersonRepository repository)
     {
-        _repository = new PersonRepository();
+        _repository = repository;
     }
-
-    //public Person Copy(Person person)
-    //{
-    //    return person;
-    //}
 
     public IQueryable<Person> GetAllAdults()
     {

@@ -2,15 +2,15 @@
 
 namespace PersonManagerApp;
 
-class PersonRepository
+class PersonRepository : IPersonRepository
 {
-    private readonly FileReader _reader;
-    private readonly PersonParser _parser;
+    private readonly IFileReader _reader;
+    private readonly IPersonParser _parser;
 
-    public PersonRepository()
+    public PersonRepository(IFileReader reader, IPersonParser parser)
     {
-        _reader = new FileReader();
-        _parser = new PersonParser();
+        _reader = reader;
+        _parser = parser;
     }
 
     public IQueryable<Person> Query()

@@ -2,7 +2,7 @@
 
 namespace PersonManagerApp;
 
-class PersonParser
+class PersonParser : IPersonParser
 {
     public Person Parse(string csvDataLine)
     {

@@ -1,12 +1,14 @@
 ﻿namespace PersonManagerApp;
 
-internal class PersonCommands
+internal class PersonCommands : IPersonCommands
 {
-    private PersonManager _manager;
-    public PersonCommands()
+    private IPersonManager _manager;
+
+    public PersonCommands(IPersonManager manager)
     {
-        _manager = new PersonManager();
+        _manager = manager;
     }
+
 
     public void DisplayAllAdults()
     {
